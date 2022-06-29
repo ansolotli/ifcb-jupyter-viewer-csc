@@ -1,0 +1,5 @@
+notebook
+ipywidgets
+numpy
+pandas
+Pillow
