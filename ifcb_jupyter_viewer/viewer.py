@@ -16,8 +16,10 @@ class JupyterViewer:
     prob : str, Path, list
         Path to a CSV-file containing class probabilities.
         A list of file paths can be provided only when mode is set to 'view'.
-    raw_dir : str, Path
+    raw_dir : str, Path, None
         Root directory of raw IFCB data.
+    img_dir : str, Path, None
+        Location of image directory. Will skip raw IFCB data extraction.
     thresholds : float, str, Path
         Single value or path to a file with class specific thresholds values.
         Default is 0.0, meaning that every image is classified.
@@ -43,7 +45,8 @@ class JupyterViewer:
     def __init__(
         self,
         prob,
-        raw_dir,
+        raw_dir=None,
+        img_dir=None,
         thresholds=0.0,
         mode="view",
         work_dir=Path.home() / "JupyterViewer",
@@ -53,26 +56,44 @@ class JupyterViewer:
         unsure_name="unsure",
     ):
 
-        self.work_dir = Path(work_dir)
+        if not (raw_dir or img_dir):
+            raise ValueError("raw_dir or img_dir required")
+        elif raw_dir and img_dir:
+            raise ValueError("Specify only raw_dir or img_dir, not both")
         self.evaluate = mode == "evaluate"
         self.label = mode == "label"
-        # This is not the best way to handle img sub dirs
+        self.work_dir = Path(work_dir)
+        # Don't remove img_dir if it was passed in directly
+        if img_dir:
+            self.remove_extracted_images = False
+        else:
+            self.remove_extracted_images = remove_extracted_images
         if isinstance(prob, list):
+            # Handle multiple samples
             if self.label or self.evaluate:
                 raise ValueError("Labeling and evaluation is allowed one sample a time")
             self.img_dir = {}
             for csv in prob:
                 sample = Path(csv).with_suffix("").stem
-                self.img_dir[sample] = self.work_dir / "images" / sample
+                if not img_dir:
+                    self.img_dir[sample] = self.work_dir / "images" / sample
+                else:
+                    self.img_dir[sample] = Path(img_dir)
         else:
-            self.sample = Path(prob).with_suffix("").stem
-            self.img_dir = self.work_dir / "images" / self.sample
+            # Only one sample
+            if not img_dir:
+                self.sample = Path(prob).with_suffix("").stem
+                self.img_dir = self.work_dir / "images" / self.sample
+            else:
+                self.sample = Path(prob).with_suffix("").stem
+                self.img_dir = Path(img_dir)
+                if not self.img_dir.is_dir():
+                    raise ValueError(f"{img_dir} does not exist")
 
         self.df = prediction_dataframe(prob, thresholds)
 
         self.raw_dir = raw_dir
         self.select = self.label or self.evaluate
-        self.remove_extracted_images = remove_extracted_images
         self.remove_empty_work_dir = remove_empty_work_dir
         self.labeled = {}
         self.moved = []

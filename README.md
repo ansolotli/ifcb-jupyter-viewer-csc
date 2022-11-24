@@ -18,3 +18,5 @@ This package along with its ![requirements](requirements.txt) can be installed w
 
 The example Jupyter Notebook `demo/viewer.ipynb` demonstrates how the viewer is imported, initialized and used.
 To find out what other usage options are available, see the inline documentation for `JupyterViewer` and its `open` method.
+
+**New**: You can now pass in an image directory to `Jupyter Viewer` directly, without having to extract raw IFCB data first. This allows the tool to potentially be used with images from other instruments.
