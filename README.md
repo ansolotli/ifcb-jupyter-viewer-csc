@@ -12,7 +12,7 @@ since it is custom built for IFCB data processing at SYKE.
 
 ## Installation
 
-Only a few common Python requirements are needed (see ![requirements.txt](requirements.txt)). This package can then be installed with: `pip install .`
+This package along with its ![requirements](requirements.txt) can be installed with: `pip install .`
 
 ## Usage
 
