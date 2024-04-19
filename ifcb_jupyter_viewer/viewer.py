@@ -48,7 +48,7 @@ class JupyterViewer:
         raw_dir=None,
         img_dir=None,
         thresholds=0.0,
-        mode="view",
+        mode="evaluate",
         work_dir=Path.home() / "shared",
         remove_extracted_images=True,
         remove_empty_work_dir=True,
